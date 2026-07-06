@@ -1,7 +1,9 @@
 (function(){
 "use strict";
 
-var CODE = (new URLSearchParams(location.search)).get("code");
+var params = new URLSearchParams(location.search);
+var CODE = params.get("code");
+var LOCATION_ID = params.get("locationId") || params.get("locationid");
 var REFRESH = 45;
 var WEATHER_REFRESH = 1200;
 var weatherInterval = 0;
@@ -97,14 +99,36 @@ function updatePump(pump, item){
 }
 
 // ----- weather -----
+var weatherDesc = "";
+var weatherIcons = {
+  "Clear":"☀","Clouds":"☁","Few clouds":"🌤","Scattered clouds":"⛅",
+  "Rain":"🌧","Drizzle":"🌦","Thunderstorm":"⛈","Snow":"❄",
+  "Mist":"🌫","Fog":"🌫","Haze":"🌫","Overcast":"☁"
+};
+var weatherRain = {Rain:true,Drizzle:true,Thunderstorm:true};
+var weatherSnow = {Snow:true};
+
 function updateWeather(data){
   var cur = data.current;
   var desc = cur.description;
   var descFr = {
     "Clear":"Ciel dégagé","Clouds":"Nuageux","Rain":"Pluvieux",
     "Drizzle":"Bruine","Thunderstorm":"Orageux","Snow":"Neige",
-    "Mist":"Brume","Fog":"Brouillard","Haze":"Brume","Overcast":"Couvert"
+    "Mist":"Brume","Fog":"Brouillard","Haze":"Brume","Overcast":"Couvert",
+    "Few clouds":"Peu nuageux","Scattered clouds":"Épars"
   };
+  weatherDesc = desc;
+
+  var tile = document.getElementById("weather-tile");
+  tile.classList.remove("weather-clear","weather-clouds","weather-rain","weather-snow","weather-mist");
+  if(desc === "Clear" || desc === "Few clouds") tile.classList.add("weather-clear");
+  else if(weatherRain[desc]) tile.classList.add("weather-rain");
+  else if(weatherSnow[desc]) tile.classList.add("weather-snow");
+  else if(desc === "Mist" || desc === "Fog" || desc === "Haze") tile.classList.add("weather-mist");
+  else tile.classList.add("weather-clouds");
+
+  var icon = weatherIcons[desc] || "🌡";
+  document.getElementById("weather-icon").textContent = icon;
 
   var tmp = cur.temperature;
   document.getElementById("weather-temp").textContent = tmp.value + tmp.unit;
@@ -127,6 +151,10 @@ function updateWeather(data){
 
   lastWeather = wind ? wind.speed.value : 0;
   document.getElementById("weather-tile").dataset.wind = lastWeather;
+
+  var canvas = document.getElementById("rain-canvas");
+  if(weatherRain[desc]) canvas.style.display = "";
+  else canvas.style.display = "none";
 }
 
 // ----- particles -----
@@ -197,6 +225,7 @@ function initParticles(){
   }
 
   function drawRain(){
+    if(rainCanvas.style.display === "none") return;
     var w = rainCanvas.width = rainCanvas.clientWidth;
     var h = rainCanvas.height = rainCanvas.clientHeight;
     rainCtx.clearRect(0,0,w,h);
@@ -244,7 +273,8 @@ function fetchData(){
 }
 
 function fetchWeather(){
-  fetch("https://www.vbus.net/api/weather/locationId/11302/timezone/Europe-Paris")
+  if(!LOCATION_ID) return;
+  fetch("https://www.vbus.net/api/weather/locationId/" + LOCATION_ID + "/timezone/Europe-Paris")
     .then(function(r){ if(!r.ok) throw Error(r.status); return r.json(); })
     .then(updateWeather)
     .catch(function(e){ console.error("Weather error:", e); });

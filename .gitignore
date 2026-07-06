@@ -1,1 +1,4 @@
 _old/
+.env
+data.json
+weather.json
