@@ -103,10 +103,29 @@ function updateWeather(data){
   var descFr = {
     "Clear":"Ciel dégagé","Clouds":"Nuageux","Rain":"Pluvieux",
     "Drizzle":"Bruine","Thunderstorm":"Orageux","Snow":"Neige",
-    "Mist":"Brume","Fog":"Brouillard","Haze":"Brume"
+    "Mist":"Brume","Fog":"Brouillard","Haze":"Brume","Overcast":"Couvert"
   };
-  document.getElementById("weather-text").textContent = descFr[desc] || desc;
-  lastWeather = cur.wind ? cur.wind.speed.value : 0;
+
+  var tmp = cur.temperature;
+  document.getElementById("weather-temp").textContent = tmp.value + tmp.unit;
+  document.getElementById("weather-desc").textContent = descFr[desc] || desc;
+
+  var wind = cur.wind;
+  var details = [];
+  if(cur.humidity) details.push(cur.humidity.value + cur.humidity.unit + " humidité");
+  if(cur.pressure) details.push(cur.pressure.value + " hPa");
+  if(wind){
+    var dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSO","SO","OSO","O","ONO","NO","NNO"];
+    var dir = dirs[Math.round(wind.direction.value / 22.5) % 16];
+    details.push(wind.speed.value + " m/s " + dir);
+  }
+  document.getElementById("weather-details").textContent = details.join(" · ");
+
+  if(data.location && data.location.city){
+    document.getElementById("weather-location").textContent = data.location.city;
+  }
+
+  lastWeather = wind ? wind.speed.value : 0;
   document.getElementById("weather-tile").dataset.wind = lastWeather;
 }
 
