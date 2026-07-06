@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chauffage</title>
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<progress id="progress" value="100" max="100"></progress>
+
+<main id="grid">
+
+  <div class="tile" id="in-tile">
+    <span class="title">Intérieur</span>
+    <span class="value">--°</span>
+    <span class="trend"></span>
+  </div>
+
+  <div class="tile" id="out-tile">
+    <span class="title">Extérieur</span>
+    <span class="value">--°</span>
+    <span class="trend"></span>
+  </div>
+
+  <div class="tile" id="consigne-tile">
+    <span class="title">Consigne</span>
+    <span class="value">--°</span>
+    <span class="trend"></span>
+  </div>
+
+  <div class="tile" id="tank-top">
+    <span class="title">Ballon haut</span>
+    <span class="value">--°</span>
+    <span class="trend"></span>
+  </div>
+
+  <div class="tile" id="tank-mid">
+    <span class="title">Ballon mid</span>
+    <span class="value">--°</span>
+    <span class="trend"></span>
+  </div>
+
+  <div class="tile" id="tank-low">
+    <span class="title">Ballon bas</span>
+    <span class="value">--°</span>
+    <span class="trend"></span>
+  </div>
+
+  <div class="tile tile-big" id="stove-tile">
+    <span class="title">Poêle</span>
+    <span class="value">--°</span>
+    <span class="trend"></span>
+    <canvas class="particles" id="fire-canvas"></canvas>
+    <div class="pump" id="pump-stove">
+      <div class="pump-knob"></div>
+    </div>
+  </div>
+
+  <div class="tile tile-big" id="solar-tile">
+    <span class="title">Solaire</span>
+    <span class="value">--°</span>
+    <span class="trend"></span>
+    <div class="pump" id="pump-solar">
+      <div class="pump-knob"></div>
+    </div>
+  </div>
+
+  <div class="tile" id="wall-tile">
+    <span class="title">Mur chauffant</span>
+    <div class="pump" id="pump-wall">
+      <div class="pump-knob"></div>
+    </div>
+  </div>
+
+  <div class="tile" id="weather-tile">
+    <span class="title">Météo</span>
+    <span class="value" id="weather-text">--</span>
+    <canvas class="particles" id="rain-canvas"></canvas>
+  </div>
+
+</main>
+
+<div id="error-banner"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

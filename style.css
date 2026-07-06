@@ -1,0 +1,151 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+html,body{
+  height:100%;
+  background:#292929;
+  color:#d6d6d6;
+  font-family:system-ui,-apple-system,sans-serif;
+  overflow:hidden;
+}
+
+#progress{
+  position:fixed;top:0;left:0;width:100%;height:3px;
+  border:none;appearance:none;-webkit-appearance:none;
+  background:#444;
+  z-index:100;
+}
+#progress::-webkit-progress-bar{background:#444}
+#progress::-webkit-progress-value{background:#479ef5;transition:width .5s linear}
+#progress::-moz-progress-bar{background:#479ef5}
+
+#grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  grid-template-rows:1fr 1fr 1fr 1fr;
+  gap:4px;
+  padding:6px 4px 4px 4px;
+  height:100%;
+  grid-template-areas:
+    "in      out      consigne"
+    "tanktop stove    stove"
+    "tankmid solar    solar"
+    "tanklow wallheat weather";
+}
+
+#in-tile{grid-area:in}
+#out-tile{grid-area:out}
+#consigne-tile{grid-area:consigne}
+#tank-top{grid-area:tanktop;border-radius:6px 6px 0 0}
+#tank-mid{grid-area:tankmid;border-radius:0}
+#tank-low{grid-area:tanklow;border-radius:0 0 6px 6px}
+#stove-tile{grid-area:stove}
+#solar-tile{grid-area:solar}
+#wall-tile{grid-area:wallheat}
+#weather-tile{grid-area:weather}
+
+.tile{
+  background:#333;
+  border-radius:6px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+  transition:box-shadow .6s,background .6s;
+  min-height:0;
+}
+
+.tile-big{grid-column:span 2}
+
+.tile .title{
+  font-size:clamp(.55rem,1.5vw,.75rem);
+  opacity:.8;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:2px;
+  z-index:1;
+}
+
+.tile .value{
+  font-size:clamp(1.2rem,4vw,2.2rem);
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+  z-index:1;
+}
+
+.tile .trend{
+  font-size:clamp(.8rem,2.5vw,1.3rem);
+  height:1.1em;
+  line-height:1;
+  z-index:1;
+}
+
+/* tank tiles stacked look */
+#tank-top,#tank-mid,#tank-low{
+  background:#2a2a2a;
+  border:1px solid #3a3a3a;
+}
+
+/* pump indicator */
+.pump{
+  position:absolute;
+  right:6px;
+  top:50%;
+  transform:translateY(-50%);
+  width:28px;
+  height:56px;
+  border-radius:14px;
+  border:2px solid #555;
+  background:#222;
+  z-index:1;
+}
+.pump-knob{
+  position:absolute;
+  left:2px;
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:#444;
+  transition:top .5s,background .5s;
+  top:32px; /* off by default */
+}
+.pump.on .pump-knob{top:2px;background:#bc2f32}
+
+/* particle canvases */
+.particles{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* trend glow */
+.tile.cooling{box-shadow:inset 0 0 30px rgba(71,158,245,.35);border:1px solid rgba(71,158,245,.4)}
+.tile.warming{box-shadow:inset 0 0 30px rgba(188,47,50,.35);border:1px solid rgba(188,47,50,.4)}
+
+/* temperature color backgrounds */
+.tile.hot-bg{background:#751d1f!important}
+.tile.cold-bg{background:#002c4e!important}
+.tile.mid-bg{background:#3a1136!important}
+
+#error-banner{
+  display:none;
+  position:fixed;
+  bottom:0;left:0;right:0;
+  background:#751d1f;
+  color:#d6d6d6;
+  text-align:center;
+  padding:4px;
+  font-size:.75rem;
+  z-index:200;
+}
+
+@media(min-width:800px){
+  #grid{gap:6px;padding:8px 6px 6px 6px}
+  .pump{width:36px;height:72px;border-radius:18px;right:10px}
+  .pump-knob{left:2px;width:28px;height:28px;top:42px}
+  .pump.on .pump-knob{top:2px}
+}
