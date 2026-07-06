@@ -2,3 +2,4 @@ _old/
 .env
 data.json
 weather.json
+graph.json
