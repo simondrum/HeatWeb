@@ -33,14 +33,6 @@ var pumps = [
   { name:"R9 POMPE BOUILLEUR",                   id:"pump-stove" }
 ];
 
-// ----- progress bar -----
-var progressStep = 100 / REFRESH;
-var progressVal = 100;
-setInterval(function(){
-  progressVal = Math.max(0, progressVal - progressStep);
-  progress.value = progressVal;
-}, 1000);
-
 // ----- trend tracking -----
 function updateHistory(key, val){
   if(!history[key]) history[key] = [];
@@ -57,6 +49,30 @@ function getTrend(key, current){
   return current > avg;
 }
 
+// ----- sparkline rendering via box-shadow positions -----
+function updateSparkline(tile, values, current){
+  var spark = tile.querySelector(".sparkline");
+  if(!spark || values.length < 2){ spark.classList.remove("visible"); return; }
+
+  spark.classList.add("visible");
+  var min = values[0], max = values[0];
+  for(var v=0;v<values.length;v++){
+    if(values[v] < min) min = values[v];
+    if(values[v] > max) max = values[v];
+  }
+  var range = max - min || 1;
+  var h = 28; /* px range in the shadow space */
+  var gaps = [];
+  for(var k=0;k<values.length;k++){
+    var norm = (values[k] - min) / range;
+    var y = Math.round((1 - norm) * h);
+    gaps.push((k * 7) + "px " + y + "px 0");
+  }
+  var color = current > max * .5 ? "#ff6b6b" : current > min + range * .5 ? "#f0c060" : "#60b0f0";
+  spark.style.color = color;
+  spark.style.setProperty("--drops", gaps.join(","));
+}
+
 // ----- update a tile -----
 function updateTile(sensor, item){
   var tile = document.getElementById(sensor.tile);
@@ -66,27 +82,28 @@ function updateTile(sensor, item){
   if(isNaN(val)) return;
 
   var valEl = tile.querySelector(".value");
-  var trendEl = tile.querySelector(".trend");
-
   valEl.textContent = val.toFixed(1) + sensor.unit;
 
   updateHistory(sensor.name, val);
   var trend = getTrend(sensor.name, val);
 
-  // trend arrow
-  if(trend === true) trendEl.textContent = "▲";
-  else if(trend === false) trendEl.textContent = "▼";
-  else trendEl.textContent = "";
+  var arr = history[sensor.name] || [];
+  updateSparkline(tile, arr, val);
 
   // color classes
-  tile.classList.remove("hot-bg","cold-bg","mid-bg","cooling","warming");
+  tile.classList.remove("hot-bg","cold-bg","mid-bg","warming","cooling");
   if(val > sensor.hot) tile.classList.add("hot-bg");
   else if(val < sensor.cold) tile.classList.add("cold-bg");
   else tile.classList.add("mid-bg");
 
-  // trend glow
+  // trend glow (warming only, no blue cooling glow)
   if(trend === true) tile.classList.add("warming");
-  else if(trend === false) tile.classList.add("cooling");
+
+  // stove heat indicator (>45°)
+  if(sensor.tile === "stove-tile"){
+    if(val > 45) tile.classList.add("stove-hot");
+    else tile.classList.remove("stove-hot");
+  }
 }
 
 // ----- update pump -----
@@ -99,7 +116,6 @@ function updatePump(pump, item){
 }
 
 // ----- weather -----
-var weatherDesc = "";
 var weatherIcons = {
   "Clear":"☀","Clouds":"☁","Few clouds":"🌤","Scattered clouds":"⛅",
   "Rain":"🌧","Drizzle":"🌦","Thunderstorm":"⛈","Snow":"❄",
@@ -111,13 +127,6 @@ var weatherSnow = {Snow:true};
 function updateWeather(data){
   var cur = data.current;
   var desc = cur.description;
-  var descFr = {
-    "Clear":"Ciel dégagé","Clouds":"Nuageux","Rain":"Pluvieux",
-    "Drizzle":"Bruine","Thunderstorm":"Orageux","Snow":"Neige",
-    "Mist":"Brume","Fog":"Brouillard","Haze":"Brume","Overcast":"Couvert",
-    "Few clouds":"Peu nuageux","Scattered clouds":"Épars"
-  };
-  weatherDesc = desc;
 
   var tile = document.getElementById("weather-tile");
   tile.classList.remove("weather-clear","weather-clouds","weather-rain","weather-snow","weather-mist");
@@ -132,25 +141,19 @@ function updateWeather(data){
 
   var tmp = cur.temperature;
   document.getElementById("weather-temp").textContent = tmp.value + tmp.unit;
-  document.getElementById("weather-desc").textContent = descFr[desc] || desc;
 
   var wind = cur.wind;
-  var details = [];
-  if(cur.humidity) details.push(cur.humidity.value + cur.humidity.unit + " humidité");
-  if(cur.pressure) details.push(cur.pressure.value + " hPa");
+  var parts = [];
+  if(cur.humidity) parts.push("💧" + cur.humidity.value + "%");
+  if(cur.pressure) parts.push("⏲" + cur.pressure.value);
   if(wind){
     var dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSO","SO","OSO","O","ONO","NO","NNO"];
     var dir = dirs[Math.round(wind.direction.value / 22.5) % 16];
-    details.push(wind.speed.value + " m/s " + dir);
+    parts.push("💨" + dir + " " + wind.speed.value);
   }
-  document.getElementById("weather-details").textContent = details.join(" · ");
-
-  if(data.location && data.location.city){
-    document.getElementById("weather-location").textContent = data.location.city;
-  }
+  document.getElementById("weather-details").textContent = parts.join("  ");
 
   lastWeather = wind ? wind.speed.value : 0;
-  document.getElementById("weather-tile").dataset.wind = lastWeather;
 
   var canvas = document.getElementById("rain-canvas");
   if(weatherRain[desc]) canvas.style.display = "";
@@ -252,9 +255,6 @@ function fetchData(){
   fetch("https://www.vbus.net/api/v5/data/live-system/" + CODE)
     .then(function(r){ if(!r.ok) throw Error(r.status); return r.json(); })
     .then(function(data){
-      progressVal = 100;
-      progress.value = 100;
-
       var nameMap = {};
       for(var i=0;i<data.length;i++) nameMap[data[i].name] = data[i];
 

@@ -9,77 +9,70 @@
 </head>
 <body>
 
-<progress id="progress" value="100" max="100"></progress>
+<div id="progress"></div>
 
 <main id="grid">
 
-  <div class="tile" id="in-tile">
+  <div class="tile" id="in-tile" style="--i:0">
     <span class="title">Intérieur</span>
     <span class="value">--°</span>
-    <span class="trend"></span>
+    <span class="sparkline" aria-hidden="true"></span>
   </div>
 
-  <div class="tile" id="out-tile">
+  <div class="tile" id="out-tile" style="--i:1">
     <span class="title">Extérieur</span>
     <span class="value">--°</span>
-    <span class="trend"></span>
+    <span class="sparkline" aria-hidden="true"></span>
   </div>
 
-  <div class="tile" id="consigne-tile">
+  <div class="tile" id="consigne-tile" style="--i:2">
     <span class="title">Consigne</span>
     <span class="value">--°</span>
-    <span class="trend"></span>
+    <span class="sparkline" aria-hidden="true"></span>
   </div>
 
-  <div class="tile" id="tank-top">
+  <div class="tile" id="tank-top" style="--i:3">
     <span class="title">Ballon haut</span>
     <span class="value">--°</span>
-    <span class="trend"></span>
+    <span class="sparkline" aria-hidden="true"></span>
   </div>
 
-  <div class="tile" id="tank-mid">
+  <div class="tile" id="tank-mid" style="--i:4">
     <span class="title">Ballon mid</span>
     <span class="value">--°</span>
-    <span class="trend"></span>
+    <span class="sparkline" aria-hidden="true"></span>
   </div>
 
-  <div class="tile" id="tank-low">
+  <div class="tile" id="tank-low" style="--i:5">
     <span class="title">Ballon bas</span>
     <span class="value">--°</span>
-    <span class="trend"></span>
+    <span class="sparkline" aria-hidden="true"></span>
   </div>
 
-  <div class="tile tile-big" id="stove-tile">
+  <div class="tile tile-big" id="stove-tile" style="--i:6">
     <span class="title">Poêle</span>
     <span class="value">--°</span>
-    <span class="trend"></span>
+    <span class="sparkline" aria-hidden="true"></span>
     <canvas class="particles" id="fire-canvas"></canvas>
-    <div class="pump" id="pump-stove">
-      <div class="pump-knob"></div>
-    </div>
+    <span class="pump-dot" id="pump-stove" title="Pompe bouilleur"></span>
   </div>
 
-  <div class="tile tile-big" id="solar-tile">
+  <div class="tile tile-big" id="solar-tile" style="--i:7">
     <span class="title">Solaire</span>
     <span class="value">--°</span>
-    <span class="trend"></span>
-    <div class="pump" id="pump-solar">
-      <div class="pump-knob"></div>
-    </div>
+    <span class="sparkline" aria-hidden="true"></span>
+    <span class="pump-dot" id="pump-solar" title="Pompe solaire"></span>
   </div>
 
-  <div class="tile" id="wall-tile">
+  <div class="tile" id="wall-tile" style="--i:8">
     <span class="title">Mur chauffant</span>
-    <div class="pump" id="pump-wall">
-      <div class="pump-knob"></div>
-    </div>
+    <span class="pump-dot" id="pump-wall" title="Pompe mur chauffant"></span>
   </div>
 
-  <div class="tile" id="weather-tile">
-    <span class="title" id="weather-location">Météo</span>
+  <div class="tile" id="weather-tile" style="--i:9">
+    <span class="title">Météo</span>
     <span class="weather-icon" id="weather-icon" aria-hidden="true"></span>
     <span class="value" id="weather-temp">--°</span>
-    <span class="weather-sub" id="weather-desc">--</span>
     <span class="weather-details" id="weather-details"></span>
     <canvas class="particles" id="rain-canvas" style="display:none"></canvas>
   </div>

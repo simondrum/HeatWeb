@@ -2,28 +2,89 @@
 
 html,body{
   height:100%;
-  background:#292929;
-  color:#d6d6d6;
-  font-family:system-ui,-apple-system,sans-serif;
+  background:radial-gradient(ellipse at 20% 80%,#1a1a2e 0%,#0a0a14 50%,#0d1117 100%);
+  color:#e8e8e8;
+  font-family:system-ui,ui-sans-serif,-apple-system,sans-serif;
   overflow:hidden;
 }
 
-#progress{
-  position:fixed;top:0;left:0;width:100%;height:3px;
-  border:none;appearance:none;-webkit-appearance:none;
-  background:#444;
-  z-index:100;
+/* ===== glass tiles ===== */
+.tile{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+  min-height:0;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  transition:background .6s,border-color .6s,box-shadow .6s,transform .15s;
+  animation:tileIn .5s ease-out both;
+  animation-delay:calc(var(--i,0)*.04s);
 }
-#progress::-webkit-progress-bar{background:#444}
-#progress::-webkit-progress-value{background:#479ef5;transition:width .5s linear}
-#progress::-moz-progress-bar{background:#479ef5}
+.tile:active{transform:scale(.97)}
 
+@keyframes tileIn{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.tile-big{grid-column:span 2}
+
+.tile .title{
+  font-size:clamp(.5rem,1.4vw,.7rem);
+  opacity:.65;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  margin-bottom:1px;
+  z-index:1;
+  font-weight:500;
+}
+
+.tile .value{
+  font-size:clamp(1.3rem,4.5vw,2.4rem);
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+  z-index:1;
+  text-shadow:0 0 20px rgba(0,0,0,.4);
+}
+
+/* ===== sparkline (6 dots history) ===== */
+.sparkline{
+  display:block;
+  width:calc(6 * 4px + 5 * 3px); /* 6 dots, 5 gaps */
+  height:4px;
+  margin-top:4px;
+  z-index:1;
+  opacity:0;
+  transition:opacity .4s;
+}
+.sparkline.visible{opacity:.6}
+.sparkline::before{
+  content:"";
+  display:block;
+  width:4px;height:4px;
+  border-radius:50%;
+  background:currentColor;
+  box-shadow:
+    7px 0 0 currentColor,
+    14px 0 0 currentColor,
+    21px 0 0 currentColor,
+    28px 0 0 currentColor,
+    35px 0 0 currentColor;
+}
+
+/* ===== grid ===== */
 #grid{
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
   grid-template-rows:1fr 1fr 1fr 1fr;
-  gap:4px;
-  padding:6px 4px 4px 4px;
+  gap:6px;
+  padding:8px 6px 6px 6px;
   height:100%;
   grid-template-areas:
     "in      out      consigne"
@@ -35,114 +96,39 @@ html,body{
 #in-tile{grid-area:in}
 #out-tile{grid-area:out}
 #consigne-tile{grid-area:consigne}
-#tank-top{grid-area:tanktop;border-radius:6px 6px 0 0}
+#tank-top{grid-area:tanktop;border-radius:10px 10px 0 0}
 #tank-mid{grid-area:tankmid;border-radius:0}
-#tank-low{grid-area:tanklow;border-radius:0 0 6px 6px}
+#tank-low{grid-area:tanklow;border-radius:0 0 10px 10px}
 #stove-tile{grid-area:stove}
 #solar-tile{grid-area:solar}
 #wall-tile{grid-area:wallheat}
 #weather-tile{grid-area:weather}
 
-.tile{
-  background:#333;
-  border-radius:6px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  position:relative;
-  overflow:hidden;
-  transition:box-shadow .6s,background .6s;
-  min-height:0;
-}
+#tank-top,#tank-mid,#tank-low{border-color:rgba(255,255,255,.08)}
 
-.tile-big{grid-column:span 2}
-
-.tile .title{
-  font-size:clamp(.55rem,1.5vw,.75rem);
-  opacity:.8;
-  text-transform:uppercase;
-  letter-spacing:.04em;
-  margin-bottom:2px;
-  z-index:1;
-}
-
-.tile .value{
-  font-size:clamp(1.2rem,4vw,2.2rem);
-  font-weight:700;
-  font-variant-numeric:tabular-nums;
-  z-index:1;
-}
-
-.tile .trend{
-  font-size:clamp(.8rem,2.5vw,1.3rem);
-  height:1.1em;
-  line-height:1;
-  z-index:1;
-}
-
-/* weather sub-info */
-.weather-icon{
-  font-size:clamp(1.5rem,5vw,2.5rem);
-  line-height:1;
-  z-index:1;
-}
-.weather-sub{
-  font-size:clamp(.5rem,1.3vw,.65rem);
-  opacity:.9;
-  z-index:1;
-}
-.weather-details{
-  font-size:clamp(.45rem,1.1vw,.55rem);
-  opacity:.6;
-  z-index:1;
-  margin-top:2px;
-  text-align:center;
-  max-width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-/* weather tile coloring */
-#weather-tile.weather-clear{background:#1a3a5c;border:1px solid #2a6090}
-#weather-tile.weather-clouds{background:#2d2d3a;border:1px solid #505060}
-#weather-tile.weather-rain{background:#1a2a3a;border:1px solid #2a4a6a}
-#weather-tile.weather-snow{background:#1a2a36;border:1px solid #3a5a6a}
-#weather-tile.weather-mist{background:#2a2a2a;border:1px solid #444}
-
-/* tank tiles stacked look */
-#tank-top,#tank-mid,#tank-low{
-  background:#2a2a2a;
-  border:1px solid #3a3a3a;
-}
-
-/* pump indicator */
-.pump{
+/* ===== pump dot ===== */
+.pump-dot{
   position:absolute;
-  right:6px;
-  top:50%;
-  transform:translateY(-50%);
-  width:28px;
-  height:56px;
-  border-radius:14px;
-  border:2px solid #555;
-  background:#222;
-  z-index:1;
-}
-.pump-knob{
-  position:absolute;
-  left:2px;
-  width:20px;
-  height:20px;
+  bottom:6px;
+  right:8px;
+  width:8px;
+  height:8px;
   border-radius:50%;
-  background:#444;
-  transition:top .5s,background .5s;
-  top:32px; /* off by default */
+  background:rgba(255,255,255,.15);
+  transition:background .4s,box-shadow .4s;
+  z-index:1;
 }
-.pump.on .pump-knob{top:2px;background:#bc2f32}
+.pump-dot.on{
+  background:#ff6b6b;
+  box-shadow:0 0 10px #ff6b6b,0 0 20px rgba(255,107,107,.4);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 8px #ff6b6b,0 0 16px rgba(255,107,107,.3)}
+  50%{box-shadow:0 0 14px #ff6b6b,0 0 28px rgba(255,107,107,.5)}
+}
 
-/* particle canvases */
+/* ===== particles ===== */
 .particles{
   position:absolute;
   inset:0;
@@ -152,30 +138,88 @@ html,body{
   z-index:0;
 }
 
-/* trend glow */
-.tile.cooling{box-shadow:inset 0 0 30px rgba(71,158,245,.35);border:1px solid rgba(71,158,245,.4)}
-.tile.warming{box-shadow:inset 0 0 30px rgba(188,47,50,.35);border:1px solid rgba(188,47,50,.4)}
+/* ===== temperature colors ===== */
+.tile.hot-bg{background:rgba(180,40,50,.25)!important;border-color:rgba(200,80,80,.3)!important}
+.tile.cold-bg{background:rgba(20,60,100,.2)!important;border-color:rgba(40,100,160,.25)!important}
+.tile.mid-bg{background:rgba(255,255,255,.04)!important}
 
-/* temperature color backgrounds */
-.tile.hot-bg{background:#751d1f!important}
-.tile.cold-bg{background:#002c4e!important}
-.tile.mid-bg{background:#3a1136!important}
+.tile.warming{box-shadow:inset 0 0 40px rgba(255,80,60,.15);border-color:rgba(255,100,80,.25)}
+.tile.cooling{border-color:rgba(255,255,255,.06)}
 
+/* stove active indicator */
+.tile.stove-hot{box-shadow:inset 0 0 50px rgba(255,120,40,.2);border-color:rgba(255,140,60,.35)}
+.tile.stove-hot .pump-dot.on{animation:pulse-strong 1s ease-in-out infinite}
+@keyframes pulse-strong{
+  0%,100%{box-shadow:0 0 12px #ff6b6b,0 0 24px rgba(255,107,107,.4)}
+  50%{box-shadow:0 0 22px #ff8c00,0 0 36px rgba(255,140,0,.6)}
+}
+
+/* ===== weather ===== */
+.weather-icon{
+  font-size:clamp(1.2rem,4vw,2rem);
+  line-height:1;
+  z-index:1;
+  margin-bottom:1px;
+}
+.weather-details{
+  position:absolute;
+  bottom:4px;
+  left:0;right:0;
+  font-size:clamp(.42rem,.9vw,.52rem);
+  opacity:.65;
+  z-index:1;
+  text-align:center;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  padding:0 4px;
+}
+#weather-tile .value{
+  font-size:clamp(1rem,3.5vw,1.8rem);
+}
+#weather-tile.weather-clear{background:rgba(40,100,180,.15);border-color:rgba(60,140,220,.25)}
+#weather-tile.weather-clouds{background:rgba(100,100,120,.1);border-color:rgba(140,140,160,.2)}
+#weather-tile.weather-rain{background:rgba(30,60,100,.15);border-color:rgba(40,80,140,.25)}
+#weather-tile.weather-snow{background:rgba(60,100,130,.1);border-color:rgba(100,140,180,.2)}
+#weather-tile.weather-mist{background:rgba(80,80,80,.08);border-color:rgba(120,120,120,.15)}
+
+/* ===== progress bar (breathing skeleton) ===== */
+#progress{
+  position:fixed;top:0;left:0;width:100%;height:2px;
+  background:rgba(255,255,255,.06);
+  z-index:100;
+  overflow:hidden;
+}
+#progress::after{
+  content:"";
+  position:absolute;
+  top:0;left:0;height:100%;
+  width:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
+  animation:breathe 2.5s ease-in-out infinite;
+}
+@keyframes breathe{
+  0%,100%{transform:translateX(-100%)}
+  50%{transform:translateX(100%)}
+}
+
+/* ===== error ===== */
 #error-banner{
   display:none;
   position:fixed;
   bottom:0;left:0;right:0;
-  background:#751d1f;
-  color:#d6d6d6;
+  background:rgba(180,40,50,.9);
+  color:#e8e8e8;
   text-align:center;
   padding:4px;
   font-size:.75rem;
   z-index:200;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
 }
 
 @media(min-width:800px){
-  #grid{gap:6px;padding:8px 6px 6px 6px}
-  .pump{width:36px;height:72px;border-radius:18px;right:10px}
-  .pump-knob{left:2px;width:28px;height:28px;top:42px}
-  .pump.on .pump-knob{top:2px}
+  #grid{gap:8px;padding:10px 8px 8px 8px}
+  .pump-dot{bottom:8px;right:10px;width:10px;height:10px}
 }
